@@ -1,651 +1,423 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Activity, CheckCircle, AlertTriangle, 
-  ChevronRight, Play, RefreshCw, Server, 
-  Volume2, Hand, RotateCcw, Share2, 
-  Info, Zap, Smartphone 
-} from 'lucide-react';
-
-// --- VISUAL COMPONENT (Moved Outside for Stability) ---
-const LevelVisual = ({ lvl }) => {
-  return (
-    <div className="w-full h-48 bg-slate-800 rounded-xl border border-slate-700 relative overflow-hidden shrink-0 mb-4">
-      {/* CSS Styles Injected Locally */}
-      <style>{`
-        @keyframes growUp { 
-          0% { transform: scaleY(0); opacity: 0; } 
-          100% { transform: scaleY(1); opacity: 1; } 
-        }
-        @keyframes sunMove { 
-          0% { bottom: -20px; left: -20px; background: #facc15; } 
-          50% { bottom: 100px; left: 50%; background: #facc15; } 
-          100% { bottom: -20px; left: 110%; background: #f97316; } 
-        }
-        @keyframes shakePhone { 
-          0%, 100% { transform: rotate(0deg); } 
-          25% { transform: rotate(-5deg); } 
-          75% { transform: rotate(5deg); } 
-        }
-        @keyframes popBubble { 
-          0% { transform: scale(0); opacity: 0; } 
-          50% { transform: scale(1.2); opacity: 1; } 
-          100% { transform: scale(1); opacity: 0; } 
-        }
-        .anim-building { transform-origin: bottom; animation: growUp 1s ease-out forwards; }
-        .anim-sun { animation: sunMove 5s infinite linear; }
-        .anim-phone { animation: shakePhone 0.5s infinite; }
-        .anim-bubble { animation: popBubble 2s infinite; }
-      `}</style>
-
-      {/* LEVEL 1: SUBURBS */}
-      {lvl === 1 && (
-        <div className="w-full h-full relative flex items-end justify-center bg-gradient-to-t from-sky-900 to-sky-700">
-          <div className="absolute inset-x-0 bottom-0 h-4 bg-emerald-600 z-10" />
-          
-          {/* Building 1 */}
-          <div className="anim-building w-12 h-20 bg-blue-400 mx-1 mb-4 relative border-2 border-blue-900 rounded-t-md z-0" style={{animationDelay: '0.1s'}}>
-             <div className="w-full h-2 bg-blue-900 absolute top-4 opacity-20"></div>
-             <div className="w-full h-2 bg-blue-900 absolute top-10 opacity-20"></div>
-          </div>
-          
-          {/* Building 2 (Tall) */}
-          <div className="anim-building w-16 h-32 bg-indigo-500 mx-1 mb-4 relative border-2 border-blue-900 rounded-t-md z-0" style={{animationDelay: '0.3s'}}>
-             <div className="w-3 h-3 bg-yellow-200 absolute top-4 left-2 rounded-full opacity-80"></div>
-             <div className="w-3 h-3 bg-yellow-200 absolute top-12 left-2 rounded-full opacity-80"></div>
-          </div>
-
-          {/* Building 3 */}
-          <div className="anim-building w-14 h-24 bg-blue-300 mx-1 mb-4 relative border-2 border-blue-900 rounded-t-md z-0" style={{animationDelay: '0.5s'}}></div>
-          
-          {/* Crane / Text */}
-          <div className="absolute top-4 right-4 bg-black/30 p-2 rounded text-[10px] text-white backdrop-blur-sm border border-white/10">
-             New Construction
-          </div>
-        </div>
-      )}
-
-      {/* LEVEL 2: CITY */}
-      {lvl === 2 && (
-        <div className="w-full h-full relative flex items-end justify-center bg-slate-900 overflow-hidden">
-          {/* Sun Animation */}
-          <div className="anim-sun w-12 h-12 rounded-full absolute z-0 shadow-[0_0_30px_rgba(250,204,21,0.5)]"></div>
-          
-          {/* Skyline Silhouette */}
-          <div className="w-full flex items-end justify-center z-10 opacity-90">
-             <div className="w-8 h-10 bg-indigo-950 mx-px"></div>
-             <div className="w-10 h-24 bg-indigo-950 mx-px"></div>
-             <div className="w-16 h-32 bg-indigo-900 mx-px border-t border-indigo-700 relative">
-                 <div className="absolute top-2 right-2 w-1 h-1 bg-red-500 animate-pulse"></div>
-             </div>
-             <div className="w-12 h-16 bg-indigo-950 mx-px"></div>
-          </div>
-
-          <div className="absolute top-4 left-4 bg-black/30 p-2 rounded text-[10px] text-white backdrop-blur-sm border border-white/10 z-20">
-             9AM - 5PM Cycle
-          </div>
-        </div>
-      )}
-
-      {/* LEVEL 3: VIRAL */}
-      {lvl === 3 && (
-        <div className="w-full h-full relative flex items-center justify-center bg-purple-900 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-800 to-slate-900">
-           {/* Phone */}
-           <div className="anim-phone relative z-10 bg-slate-800 p-2 rounded-2xl border-4 border-slate-600 shadow-xl">
-               <div className="w-16 h-28 bg-black rounded-lg flex flex-col items-center justify-center relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-purple-600 to-pink-600 opacity-50"></div>
-                  <h3 className="text-white text-[10px] font-bold relative z-10 animate-pulse">FLASH<br/>SALE</h3>
-               </div>
-           </div>
-
-           {/* Notifications */}
-           <div className="anim-bubble absolute top-10 left-1/4 bg-red-500 text-white p-1 rounded-full shadow-lg" style={{animationDelay: '0s'}}>
-              <Zap size={16} fill="white"/>
-           </div>
-           <div className="anim-bubble absolute bottom-10 right-1/4 bg-green-500 text-white p-1 rounded-full shadow-lg" style={{animationDelay: '1s'}}>
-              <Activity size={16} />
-           </div>
-           <div className="anim-bubble absolute top-12 right-1/3 bg-blue-500 text-white px-2 py-0.5 rounded-full shadow-lg text-[8px] font-bold" style={{animationDelay: '0.5s'}}>
-              +1M
-           </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// --- MAIN GAME COMPONENT ---
-const SignalArchitect = () => {
-  // --- Game State ---
-  const [phase, setPhase] = useState('INTRO');
-  const [level, setLevel] = useState(1);
-  const [integrity, setIntegrity] = useState(100); 
-  const [dialogue, setDialogue] = useState("");
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [shareLabel, setShareLabel] = useState("SHARE");
-  
-  // --- Data & Simulation State ---
-  const [historicalData, setHistoricalData] = useState([]);
-  const [futureData, setFutureData] = useState([]);
-  const [modelPrediction, setModelPrediction] = useState([]);
-  const [selectedModel, setSelectedModel] = useState(null); 
-  const [capacity, setCapacity] = useState(50);
-  const [simProgress, setSimProgress] = useState(0); 
-  const [userTouchedSlider, setUserTouchedSlider] = useState(false); 
-  
-  // --- Refs ---
-  const canvasRef = useRef(null);
-  const speechRef = useRef(null);
-
-  // --- Constants ---
-  const VISIBLE_TICKS = 30;
-  const TOTAL_TICKS = 50;
-
-  const LEVELS = {
-    1: {
-      name: "Suburban Expansion",
-      patternName: "Linear Trend",
-      context: "A new housing estate is being built. As new families move in, data usage grows steadily.",
-      type: 'linear',
-      tip: "Look for a steady upward climb. A simple model works best here."
-    },
-    2: {
-      name: "Business District",
-      patternName: "Daily Seasonality",
-      context: "Office workers arrive at 9AM and leave at 5PM. The network usage rises and falls with the sun.",
-      type: 'seasonal',
-      tip: "The pattern repeats in waves. A linear line won't catch the peaks and valleys."
-    },
-    3: {
-      name: "Viral Event",
-      patternName: "Non-Linear Anomaly",
-      context: "A sudden flash sale has gone viral! Usage is chaotic and spiking unpredictably.",
-      type: 'complex',
-      tip: "Standard patterns are broken. You need a model that adapts to chaos."
-    }
-  };
-
-  const MODELS = {
-    'LINEAR': { 
-      name: 'Linear Regression', 
-      desc: 'Fits a straight line. Best for simple trends.',
-      fitLogic: (type) => type === 'linear' ? 'GOOD' : 'BAD_UNDERFIT'
-    },
-    'FOREST': { 
-      name: 'Random Forest', 
-      desc: 'Handles repeating cycles and steps.',
-      fitLogic: (type) => type === 'seasonal' ? 'GOOD' : (type === 'linear' ? 'OK_OVERKILL' : 'BAD_LAG')
-    },
-    'NEURAL': { 
-      name: 'Deep Neural Net', 
-      desc: 'Adapts to complex noise and spikes.',
-      fitLogic: (type) => 'GOOD'
-    }
-  };
-
-  // --- Audio ---
-  const speak = (text) => {
-    if (speechRef.current) window.speechSynthesis.cancel();
-    setDialogue(text);
-    setIsSpeaking(true);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signal Architect: ML Ops Game</title>
     
-    setTimeout(() => {
-        const utterance = new SpeechSynthesisUtterance(text);
-        const voices = window.speechSynthesis.getVoices();
-        let preferred = voices.find(v => v.name === 'Google US English') || 
-                        voices.find(v => v.name.includes('Samantha')) ||
-                        voices.find(v => v.name.includes('Female'));
-        if (preferred) utterance.voice = preferred;
-        utterance.pitch = 1.05; 
-        utterance.rate = 0.95;  
-        utterance.onend = () => setIsSpeaking(false);
-        speechRef.current = utterance;
-        window.speechSynthesis.speak(utterance);
-    }, 50);
-  };
-
-  // --- Actions ---
-  const restartGame = () => {
-    if (speechRef.current) window.speechSynthesis.cancel();
-    setPhase('INTRO');
-    setLevel(1);
-    setIntegrity(100);
-    setDialogue("");
-    setIsSpeaking(false);
-    setHistoricalData([]);
-    setFutureData([]);
-    setModelPrediction([]);
-    setSelectedModel(null);
-    setCapacity(50);
-    setSimProgress(0);
-    setUserTouchedSlider(false);
-  };
-
-  const shareGame = async () => {
-    const text = "I just mastered Machine Learning by saving the grid in Signal Architect!";
-    try {
-        if (navigator.share) {
-            await navigator.share({ title: 'Signal Architect', text: text, url: window.location.href });
-        } else {
-            await navigator.clipboard.writeText(text);
-            setShareLabel("COPIED!");
-            setTimeout(() => setShareLabel("SHARE"), 2000);
-        }
-    } catch (err) { console.error("Share failed", err); }
-  };
-
-  const initLevel = (lvl) => {
-    setLevel(lvl);
-    setPhase('BRIEFING');
-    setSelectedModel(null);
-    setModelPrediction([]);
-    setSimProgress(0);
-    setUserTouchedSlider(false);
+    <!-- 1. Tailwind CSS (Styling) -->
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    // Generate Data
-    const history = [];
-    const future = [];
-    const type = LEVELS[lvl].type;
-
-    for (let i = 0; i < TOTAL_TICKS; i++) {
-      let val = 50;
-      let noise = (Math.random() - 0.5) * 8; 
-
-      if (type === 'linear') {
-        val = 30 + (i * 1.8) + noise;
-      } else if (type === 'seasonal') {
-        val = 60 + Math.sin(i / 2.5) * 35 + noise;
-      } else {
-        val = 40 + (i * 0.5) + Math.sin(i / 1.5) * 20 + (Math.random() * 40 - 20);
-        if (i > 35) val += 40; 
-      }
-      val = Math.max(10, Math.min(140, val));
-      if (i < VISIBLE_TICKS) history.push({ x: i, y: val });
-      else future.push({ x: i, y: val });
-    }
+    <!-- 2. React & ReactDOM (Core Engine) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    setHistoricalData(history);
-    setFutureData(future);
-    setCapacity(50);
-
-    setTimeout(() => {
-        speak(`Level ${lvl}. ${LEVELS[lvl].name}. ${LEVELS[lvl].context}`);
-    }, 500);
-  };
-
-  const selectModel = (modelKey) => {
-    setSelectedModel(modelKey);
-    const fitQuality = MODELS[modelKey].fitLogic(LEVELS[level].type);
+    <!-- 3. Babel (Translates our code to browser-friendly JS) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    const allTicks = [...historicalData, ...futureData];
-    const pred = allTicks.map((pt, i) => {
-        let yPred = pt.y;
-        if (fitQuality === 'BAD_UNDERFIT') yPred = 60 + (i * 0.5); 
-        else if (fitQuality === 'BAD_LAG') yPred = pt.y * 0.6 + 30;
-        else if (fitQuality === 'OK_OVERKILL') yPred = pt.y + (Math.random() * 10 - 5);
-        else yPred = pt.y + (Math.random() * 5 - 2.5);
-        return { x: pt.x, y: yPred };
-    });
+    <style>
+        /* Custom Scrollbar for cyberpunk feel */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        body { background-color: #020617; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
 
-    setModelPrediction(pred);
-    
-    let feedback = fitQuality.includes('BAD') 
-        ? "Careful. This model doesn't seem to fit the pattern well." 
-        : "Excellent choice. The model fits the data pattern perfectly.";
-    speak(feedback + " Now, adjust the server capacity.");
-    setPhase('CONFIGURE');
-  };
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
 
-  const runSimulation = () => {
-    setPhase('SIMULATION');
-    setSimProgress(0);
-    speak("Deploying configuration. Watching live traffic now.");
-  };
+        // --- ICONS (SVG Components) ---
+        // Since we aren't using a build step, we define icons manually here.
+        const IconBase = ({ d, className, fill="none" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {d}
+            </svg>
+        );
 
-  useEffect(() => {
-    if (phase === 'SIMULATION') {
-        const totalPoints = futureData.length;
-        if (simProgress < totalPoints) {
-            const timer = setTimeout(() => {
-                setSimProgress(prev => prev + 1);
-            }, 120); 
-            return () => clearTimeout(timer);
-        } else {
-            setTimeout(calculateResult, 1000);
-        }
-    }
-  }, [phase, simProgress, futureData]);
+        const Activity = (p) => <IconBase {...p} d={<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>} />;
+        const Shield = (p) => <IconBase {...p} d={<><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></>} />;
+        const CheckCircle = (p) => <IconBase {...p} d={<><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>} />;
+        const AlertTriangle = (p) => <IconBase {...p} d={<><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></>} />;
+        const ChevronRight = (p) => <IconBase {...p} d={<polyline points="9 18 15 12 9 6"/>} />;
+        const Play = (p) => <IconBase {...p} fill={p.fill || "none"} d={<polygon points="5 3 19 12 5 21 5 3"/>} />;
+        const RefreshCw = (p) => <IconBase {...p} d={<><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></>} />;
+        const Server = (p) => <IconBase {...p} d={<><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></>} />;
+        const Volume2 = (p) => <IconBase {...p} d={<><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></>} />;
+        const Hand = (p) => <IconBase {...p} d={<><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></>} />;
+        const RotateCcw = (p) => <IconBase {...p} d={<><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></>} />;
+        const Share2 = (p) => <IconBase {...p} d={<><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></>} />;
+        const Info = (p) => <IconBase {...p} d={<><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></>} />;
+        const Zap = (p) => <IconBase {...p} fill={p.fill || "none"} d={<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>} />;
 
-  const calculateResult = () => {
-    let crashCount = 0;
-    futureData.forEach(pt => { if (pt.y > capacity) crashCount++; });
+        // --- VISUAL COMPONENT (Animations) ---
+        const LevelVisual = ({ lvl }) => {
+            return (
+                <div className="w-full h-48 bg-slate-800 rounded-xl border border-slate-700 relative overflow-hidden shrink-0 mb-4">
+                    <style>{`
+                        @keyframes growUp { 0% { transform: scaleY(0); opacity: 0; } 100% { transform: scaleY(1); opacity: 1; } }
+                        @keyframes sunMove { 0% { bottom: -20px; left: -20px; background: #facc15; } 50% { bottom: 100px; left: 50%; background: #facc15; } 100% { bottom: -20px; left: 110%; background: #f97316; } }
+                        @keyframes shakePhone { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-5deg); } 75% { transform: rotate(5deg); } }
+                        @keyframes popBubble { 0% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+                        .anim-building { transform-origin: bottom; animation: growUp 1s ease-out forwards; }
+                        .anim-sun { animation: sunMove 5s infinite linear; }
+                        .anim-phone { animation: shakePhone 0.5s infinite; }
+                        .anim-bubble { animation: popBubble 2s infinite; }
+                    `}</style>
 
-    let newIntegrity = integrity;
-    let message = "";
-
-    if (crashCount > 3) {
-        newIntegrity -= 25;
-        message = "System Overload! Capacity was too low.";
-    } else if (capacity > Math.max(...futureData.map(d=>d.y)) + 40) {
-        newIntegrity -= 10;
-        message = "The system held up, but we wasted a lot of energy.";
-    } else {
-        message = "Perfect optimization! Minimal waste and zero crashes.";
-    }
-
-    setIntegrity(newIntegrity);
-    setPhase('DEBRIEF');
-    speak(message);
-  };
-
-  // --- Rendering ---
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const parent = canvas.parentElement;
-    canvas.width = parent.clientWidth;
-    canvas.height = parent.clientHeight;
-    
-    const ctx = canvas.getContext('2d');
-    const w = canvas.width;
-    const h = canvas.height;
-
-    // Draw Background
-    ctx.fillStyle = '#1e293b'; 
-    ctx.fillRect(0, 0, w, h);
-
-    // Draw Grid
-    ctx.strokeStyle = '#334155';
-    ctx.lineWidth = 1;
-    for(let i=0; i<w; i+=w/10) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,h); ctx.stroke(); }
-    for(let i=0; i<h; i+=h/5) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(w,i); ctx.stroke(); }
-
-    const mapX = (x) => (x / TOTAL_TICKS) * w;
-    const mapY = (y) => h - ((y / 220) * h);
-
-    if (historicalData.length > 0) {
-        ctx.beginPath();
-        ctx.strokeStyle = '#38bdf8'; 
-        ctx.lineWidth = 3;
-        historicalData.forEach((pt, i) => {
-            if (i===0) ctx.moveTo(mapX(pt.x), mapY(pt.y));
-            else ctx.lineTo(mapX(pt.x), mapY(pt.y));
-        });
-        ctx.stroke();
-    }
-
-    if (modelPrediction.length > 0) {
-        ctx.beginPath();
-        ctx.strokeStyle = '#c084fc'; 
-        ctx.lineWidth = 2;
-        ctx.setLineDash([5, 5]);
-        modelPrediction.forEach((pt, i) => {
-             if (i===0) ctx.moveTo(mapX(pt.x), mapY(pt.y));
-             else ctx.lineTo(mapX(pt.x), mapY(pt.y));
-        });
-        ctx.stroke();
-        ctx.setLineDash([]);
-    }
-
-    if (phase === 'CONFIGURE' || phase === 'SIMULATION' || phase === 'DEBRIEF') {
-        const y = mapY(capacity);
-        ctx.beginPath();
-        ctx.strokeStyle = phase === 'SIMULATION' ? '#fff' : '#4ade80';
-        ctx.lineWidth = 3;
-        ctx.moveTo(0, y);
-        ctx.lineTo(w, y);
-        ctx.stroke();
-    }
-
-    if (phase === 'SIMULATION' || phase === 'DEBRIEF') {
-        ctx.beginPath();
-        ctx.strokeStyle = 'white';
-        ctx.lineWidth = 1;
-        ctx.globalAlpha = 0.8;
-        
-        const dataToDraw = phase === 'DEBRIEF' ? futureData : futureData.slice(0, simProgress);
-
-        dataToDraw.forEach((pt, i) => {
-             if (i===0) ctx.moveTo(mapX(pt.x), mapY(pt.y));
-             else ctx.lineTo(mapX(pt.x), mapY(pt.y));
-        });
-        ctx.stroke();
-        ctx.globalAlpha = 1;
-
-        dataToDraw.forEach(pt => {
-            if (pt.y > capacity) {
-                ctx.fillStyle = '#ef4444';
-                ctx.beginPath();
-                ctx.arc(mapX(pt.x), mapY(capacity), 5, 0, Math.PI*2);
-                ctx.fill();
-            }
-        });
-    }
-
-    const divX = mapX(VISIBLE_TICKS);
-    ctx.strokeStyle = '#94a3b8';
-    ctx.setLineDash([2, 2]);
-    ctx.beginPath();
-    ctx.moveTo(divX, 0);
-    ctx.lineTo(divX, h);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '10px sans-serif';
-    ctx.fillText("PAST", 10, h-10);
-    ctx.fillText("FUTURE", divX + 10, h-10);
-
-  }, [historicalData, modelPrediction, capacity, phase, futureData, simProgress]);
-
-  // --- Screens ---
-  const IntroScreen = () => (
-    <div className="flex flex-col h-full bg-slate-900 text-white p-6 overflow-y-auto">
-        <div className="flex-1 flex flex-col justify-center items-center text-center space-y-6">
-            <div className="bg-blue-600/20 p-6 rounded-full relative">
-                <Volume2 className="absolute top-0 right-0 text-blue-300 animate-pulse" size={24} />
-                <Server size={64} className="text-blue-400" />
-            </div>
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">
-                Signal Architect
-            </h1>
-            <div className="text-left bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4 shadow-xl">
-                <h3 className="font-bold text-blue-300 flex items-center gap-2">
-                    <Info size={18}/> REAL WORLD CONTEXT
-                </h3>
-                <p className="text-slate-300 text-sm leading-relaxed">
-                    <strong>Problem:</strong> Telecom towers crash if they have too many users, but waste money if they have too many servers.
-                </p>
-                <p className="text-slate-300 text-sm leading-relaxed">
-                    <strong>Solution:</strong> Use <span className="text-purple-400 font-bold">Machine Learning</span> to predict the future.
-                </p>
-                <p className="text-slate-300 text-sm leading-relaxed">
-                    <strong>Mission:</strong> Analyze the pattern, choose the model, set the capacity.
-                </p>
-            </div>
-        </div>
-        <button 
-            onClick={() => {
-                const synth = window.speechSynthesis; 
-                speak("Welcome, Architect. I am Aria. I will guide you.");
-                initLevel(1);
-            }}
-            className="w-full py-4 bg-blue-600 active:bg-blue-700 font-bold rounded-xl shadow-lg mt-6 text-lg animate-pulse"
-        >
-            INITIALIZE (AUDIO ON)
-        </button>
-    </div>
-  );
-
-  if (phase === 'INTRO') return <IntroScreen />;
-
-  return (
-    <div className="h-screen bg-slate-950 flex flex-col font-sans text-slate-100 overflow-hidden selection:bg-blue-500/30">
-      
-      {/* 1. Header */}
-      <header className="flex-none bg-slate-900 border-b border-slate-800 p-3 flex justify-between items-center shadow-md z-10">
-        <div className="flex flex-col">
-            <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">INTEGRITY</span>
-            <div className="flex items-center gap-2">
-                <div className="w-24 h-2 bg-slate-800 rounded-full overflow-hidden">
-                    <div className={`h-full transition-all duration-500 ${integrity > 50 ? 'bg-green-500' : 'bg-red-500'}`} style={{width: `${integrity}%`}} />
-                </div>
-            </div>
-        </div>
-        <div className="flex flex-col text-right">
-            <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">LEVEL {level}</span>
-            <span className="text-xs font-bold text-blue-400">{LEVELS[level].name}</span>
-        </div>
-      </header>
-
-      {/* 2. Main Visual Area (Canvas) */}
-      <div className="flex-1 relative bg-slate-900 w-full min-h-[35vh]">
-        <div className="absolute top-4 left-4 right-4 bg-slate-950/90 backdrop-blur-md border border-slate-700 p-3 rounded-xl shadow-2xl flex gap-3 items-start z-20 pointer-events-none">
-            <div className={`mt-1 w-2 h-2 rounded-full ${isSpeaking ? 'bg-blue-400 animate-ping' : 'bg-slate-600'}`} />
-            <p className="text-sm text-slate-200 leading-snug font-medium">{dialogue || "Awaiting input..."}</p>
-        </div>
-        <canvas ref={canvasRef} className="w-full h-full block" />
-      </div>
-
-      {/* 3. Controls Area */}
-      <div className="flex-none bg-slate-950 border-t border-slate-800 p-4 pb-8 min-h-[40vh] max-h-[50vh] overflow-y-auto relative">
-        
-        {phase === 'BRIEFING' && (
-            <div className="h-full flex flex-col justify-center space-y-4">
-                {/* --- ANIMATION IS HERE --- */}
-                <LevelVisual lvl={level} />
-                
-                <div className="p-4 bg-slate-900 rounded-xl border border-slate-800">
-                    <h3 className="text-blue-400 text-sm font-bold mb-1">OBJECTIVE</h3>
-                    <p className="text-slate-400 text-sm">{LEVELS[level].context}</p>
-                </div>
-                <div className="p-4 bg-slate-900 rounded-xl border border-slate-800">
-                    <h3 className="text-yellow-400 text-sm font-bold mb-1">HINT</h3>
-                    <p className="text-slate-400 text-sm">{LEVELS[level].tip}</p>
-                </div>
-                <button 
-                    onClick={() => setPhase('SELECT_MODEL')}
-                    className="w-full py-4 bg-blue-600 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform"
-                >
-                    SELECT MODEL <ChevronRight size={18}/>
-                </button>
-            </div>
-        )}
-
-        {phase === 'SELECT_MODEL' && (
-            <div className="space-y-3">
-                <h3 className="text-xs text-slate-500 font-bold uppercase tracking-widest mb-2">CHOOSE ALGORITHM</h3>
-                {Object.keys(MODELS).map(key => (
-                    <button 
-                        key={key}
-                        onClick={() => selectModel(key)}
-                        className="w-full bg-slate-900 hover:bg-slate-800 border border-slate-800 p-4 rounded-xl text-left transition-all active:border-blue-500 group"
-                    >
-                        <div className="flex justify-between items-center mb-1">
-                            <span className="font-bold text-slate-200 group-hover:text-blue-400">{MODELS[key].name}</span>
+                    {lvl === 1 && (
+                        <div className="w-full h-full relative flex items-end justify-center bg-gradient-to-t from-sky-900 to-sky-700">
+                            <div className="absolute inset-x-0 bottom-0 h-4 bg-emerald-600 z-10" />
+                            <div className="anim-building w-12 h-20 bg-blue-400 mx-1 mb-4 relative border-2 border-blue-900 rounded-t-md z-0" style={{animationDelay: '0.1s'}}>
+                                <div className="w-full h-2 bg-blue-900 absolute top-4 opacity-20"></div>
+                                <div className="w-full h-2 bg-blue-900 absolute top-10 opacity-20"></div>
+                            </div>
+                            <div className="anim-building w-16 h-32 bg-indigo-500 mx-1 mb-4 relative border-2 border-blue-900 rounded-t-md z-0" style={{animationDelay: '0.3s'}}>
+                                <div className="w-3 h-3 bg-yellow-200 absolute top-4 left-2 rounded-full opacity-80"></div>
+                                <div className="w-3 h-3 bg-yellow-200 absolute top-12 left-2 rounded-full opacity-80"></div>
+                            </div>
+                            <div className="anim-building w-14 h-24 bg-blue-300 mx-1 mb-4 relative border-2 border-blue-900 rounded-t-md z-0" style={{animationDelay: '0.5s'}}></div>
+                            <div className="absolute top-4 right-4 bg-black/30 p-2 rounded text-[10px] text-white backdrop-blur-sm border border-white/10">New Construction</div>
                         </div>
-                        <p className="text-xs text-slate-500 leading-tight">{MODELS[key].desc}</p>
-                    </button>
-                ))}
-            </div>
-        )}
+                    )}
 
-        {phase === 'CONFIGURE' && (
-            <div className="h-full flex flex-col">
-                <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 mb-6 relative">
-                    <div className="flex justify-between items-center mb-4">
-                        <span className="text-sm font-bold text-slate-400">SERVER CAPACITY</span>
-                        <span className="text-xl font-mono text-green-400">{capacity} TB/s</span>
+                    {lvl === 2 && (
+                        <div className="w-full h-full relative flex items-end justify-center bg-slate-900 overflow-hidden">
+                            <div className="anim-sun w-12 h-12 rounded-full absolute z-0 shadow-[0_0_30px_rgba(250,204,21,0.5)]"></div>
+                            <div className="w-full flex items-end justify-center z-10 opacity-90">
+                                <div className="w-8 h-10 bg-indigo-950 mx-px"></div>
+                                <div className="w-10 h-24 bg-indigo-950 mx-px"></div>
+                                <div className="w-16 h-32 bg-indigo-900 mx-px border-t border-indigo-700 relative">
+                                    <div className="absolute top-2 right-2 w-1 h-1 bg-red-500 animate-pulse"></div>
+                                </div>
+                                <div className="w-12 h-16 bg-indigo-950 mx-px"></div>
+                            </div>
+                            <div className="absolute top-4 left-4 bg-black/30 p-2 rounded text-[10px] text-white backdrop-blur-sm border border-white/10 z-20">9AM - 5PM Cycle</div>
+                        </div>
+                    )}
+
+                    {lvl === 3 && (
+                        <div className="w-full h-full relative flex items-center justify-center bg-purple-900 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-800 to-slate-900">
+                            <div className="anim-phone relative z-10 bg-slate-800 p-2 rounded-2xl border-4 border-slate-600 shadow-xl">
+                                <div className="w-16 h-28 bg-black rounded-lg flex flex-col items-center justify-center relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-purple-600 to-pink-600 opacity-50"></div>
+                                    <h3 className="text-white text-[10px] font-bold relative z-10 animate-pulse">FLASH<br/>SALE</h3>
+                                </div>
+                            </div>
+                            <div className="anim-bubble absolute top-10 left-1/4 bg-red-500 text-white p-1 rounded-full shadow-lg" style={{animationDelay: '0s'}}><Zap size={16} fill="white"/></div>
+                            <div className="anim-bubble absolute bottom-10 right-1/4 bg-green-500 text-white p-1 rounded-full shadow-lg" style={{animationDelay: '1s'}}><Activity size={16} /></div>
+                            <div className="anim-bubble absolute top-12 right-1/3 bg-blue-500 text-white px-2 py-0.5 rounded-full shadow-lg text-[8px] font-bold" style={{animationDelay: '0.5s'}}>+1M</div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- MAIN APP COMPONENT ---
+        const SignalArchitect = () => {
+            const [phase, setPhase] = useState('INTRO');
+            const [level, setLevel] = useState(1);
+            const [integrity, setIntegrity] = useState(100); 
+            const [dialogue, setDialogue] = useState("");
+            const [isSpeaking, setIsSpeaking] = useState(false);
+            const [shareLabel, setShareLabel] = useState("SHARE");
+            
+            const [historicalData, setHistoricalData] = useState([]);
+            const [futureData, setFutureData] = useState([]);
+            const [modelPrediction, setModelPrediction] = useState([]);
+            const [selectedModel, setSelectedModel] = useState(null); 
+            const [capacity, setCapacity] = useState(50);
+            const [simProgress, setSimProgress] = useState(0); 
+            const [userTouchedSlider, setUserTouchedSlider] = useState(false); 
+            
+            const canvasRef = useRef(null);
+            const speechRef = useRef(null);
+
+            const VISIBLE_TICKS = 30;
+            const TOTAL_TICKS = 50;
+
+            const LEVELS = {
+                1: { name: "Suburban Expansion", patternName: "Linear Trend", context: "A new housing estate is being built. As new families move in, data usage grows steadily.", type: 'linear', tip: "Look for a steady upward climb. A simple model works best here." },
+                2: { name: "Business District", patternName: "Daily Seasonality", context: "Office workers arrive at 9AM and leave at 5PM. The network usage rises and falls with the sun.", type: 'seasonal', tip: "The pattern repeats in waves. A linear line won't catch the peaks and valleys." },
+                3: { name: "Viral Event", patternName: "Non-Linear Anomaly", context: "A sudden flash sale has gone viral! Usage is chaotic and spiking unpredictably.", type: 'complex', tip: "Standard patterns are broken. You need a model that adapts to chaos." }
+            };
+
+            const MODELS = {
+                'LINEAR': { name: 'Linear Regression', desc: 'Fits a straight line. Best for simple trends.', fitLogic: (type) => type === 'linear' ? 'GOOD' : 'BAD_UNDERFIT' },
+                'FOREST': { name: 'Random Forest', desc: 'Handles repeating cycles and steps.', fitLogic: (type) => type === 'seasonal' ? 'GOOD' : (type === 'linear' ? 'OK_OVERKILL' : 'BAD_LAG') },
+                'NEURAL': { name: 'Deep Neural Net', desc: 'Adapts to complex noise and spikes.', fitLogic: (type) => 'GOOD' }
+            };
+
+            const speak = (text) => {
+                if (speechRef.current) window.speechSynthesis.cancel();
+                setDialogue(text);
+                setIsSpeaking(true);
+                setTimeout(() => {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    const voices = window.speechSynthesis.getVoices();
+                    let preferred = voices.find(v => v.name === 'Google US English') || voices.find(v => v.name.includes('Samantha')) || voices.find(v => v.name.includes('Female'));
+                    if (preferred) utterance.voice = preferred;
+                    utterance.pitch = 1.05; utterance.rate = 0.95;
+                    utterance.onend = () => setIsSpeaking(false);
+                    speechRef.current = utterance;
+                    window.speechSynthesis.speak(utterance);
+                }, 50);
+            };
+
+            const restartGame = () => {
+                if (speechRef.current) window.speechSynthesis.cancel();
+                setPhase('INTRO'); setLevel(1); setIntegrity(100); setDialogue(""); setIsSpeaking(false);
+                setHistoricalData([]); setFutureData([]); setModelPrediction([]); setSelectedModel(null); setCapacity(50); setSimProgress(0); setUserTouchedSlider(false);
+            };
+
+            const shareGame = async () => {
+                const text = "I just mastered Machine Learning by saving the grid in Signal Architect!";
+                try {
+                    if (navigator.share) { await navigator.share({ title: 'Signal Architect', text: text, url: window.location.href }); }
+                    else { await navigator.clipboard.writeText(text); setShareLabel("COPIED!"); setTimeout(() => setShareLabel("SHARE"), 2000); }
+                } catch (err) { console.error("Share failed", err); }
+            };
+
+            const initLevel = (lvl) => {
+                setLevel(lvl); setPhase('BRIEFING'); setSelectedModel(null); setModelPrediction([]); setSimProgress(0); setUserTouchedSlider(false);
+                const history = []; const future = []; const type = LEVELS[lvl].type;
+                for (let i = 0; i < TOTAL_TICKS; i++) {
+                    let val = 50; let noise = (Math.random() - 0.5) * 8;
+                    if (type === 'linear') val = 30 + (i * 1.8) + noise;
+                    else if (type === 'seasonal') val = 60 + Math.sin(i / 2.5) * 35 + noise;
+                    else { val = 40 + (i * 0.5) + Math.sin(i / 1.5) * 20 + (Math.random() * 40 - 20); if (i > 35) val += 40; }
+                    val = Math.max(10, Math.min(140, val));
+                    if (i < VISIBLE_TICKS) history.push({ x: i, y: val }); else future.push({ x: i, y: val });
+                }
+                setHistoricalData(history); setFutureData(future); setCapacity(50);
+                setTimeout(() => { speak(`Level ${lvl}. ${LEVELS[lvl].name}. ${LEVELS[lvl].context}`); }, 500);
+            };
+
+            const selectModel = (modelKey) => {
+                setSelectedModel(modelKey);
+                const fitQuality = MODELS[modelKey].fitLogic(LEVELS[level].type);
+                const allTicks = [...historicalData, ...futureData];
+                const pred = allTicks.map((pt, i) => {
+                    let yPred = pt.y;
+                    if (fitQuality === 'BAD_UNDERFIT') yPred = 60 + (i * 0.5);
+                    else if (fitQuality === 'BAD_LAG') yPred = pt.y * 0.6 + 30;
+                    else if (fitQuality === 'OK_OVERKILL') yPred = pt.y + (Math.random() * 10 - 5);
+                    else yPred = pt.y + (Math.random() * 5 - 2.5);
+                    return { x: pt.x, y: yPred };
+                });
+                setModelPrediction(pred);
+                let feedback = fitQuality.includes('BAD') ? "Careful. This model doesn't seem to fit the pattern well." : "Excellent choice. The model fits the data pattern perfectly.";
+                speak(feedback + " Now, adjust the server capacity.");
+                setPhase('CONFIGURE');
+            };
+
+            const runSimulation = () => { setPhase('SIMULATION'); setSimProgress(0); speak("Deploying configuration. Watching live traffic now."); };
+
+            useEffect(() => {
+                if (phase === 'SIMULATION') {
+                    const totalPoints = futureData.length;
+                    if (simProgress < totalPoints) {
+                        const timer = setTimeout(() => { setSimProgress(prev => prev + 1); }, 120);
+                        return () => clearTimeout(timer);
+                    } else { setTimeout(calculateResult, 1000); }
+                }
+            }, [phase, simProgress, futureData]);
+
+            const calculateResult = () => {
+                let crashCount = 0;
+                futureData.forEach(pt => { if (pt.y > capacity) crashCount++; });
+                let newIntegrity = integrity; let message = "";
+                if (crashCount > 3) { newIntegrity -= 25; message = "System Overload! Capacity was too low."; }
+                else if (capacity > Math.max(...futureData.map(d=>d.y)) + 40) { newIntegrity -= 10; message = "The system held up, but we wasted a lot of energy."; }
+                else { message = "Perfect optimization! Minimal waste and zero crashes."; }
+                setIntegrity(newIntegrity); setPhase('DEBRIEF'); speak(message);
+            };
+
+            // Canvas Drawing Logic
+            useEffect(() => {
+                const canvas = canvasRef.current;
+                if (!canvas) return;
+                const parent = canvas.parentElement;
+                canvas.width = parent.clientWidth;
+                canvas.height = parent.clientHeight;
+                const ctx = canvas.getContext('2d');
+                const w = canvas.width; const h = canvas.height;
+
+                ctx.fillStyle = '#1e293b'; ctx.fillRect(0, 0, w, h);
+                ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+                for(let i=0; i<w; i+=w/10) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,h); ctx.stroke(); }
+                for(let i=0; i<h; i+=h/5) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(w,i); ctx.stroke(); }
+
+                const mapX = (x) => (x / TOTAL_TICKS) * w;
+                const mapY = (y) => h - ((y / 220) * h);
+
+                if (historicalData.length > 0) {
+                    ctx.beginPath(); ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 3;
+                    historicalData.forEach((pt, i) => { if (i===0) ctx.moveTo(mapX(pt.x), mapY(pt.y)); else ctx.lineTo(mapX(pt.x), mapY(pt.y)); });
+                    ctx.stroke();
+                }
+
+                if (modelPrediction.length > 0) {
+                    ctx.beginPath(); ctx.strokeStyle = '#c084fc'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
+                    modelPrediction.forEach((pt, i) => { if (i===0) ctx.moveTo(mapX(pt.x), mapY(pt.y)); else ctx.lineTo(mapX(pt.x), mapY(pt.y)); });
+                    ctx.stroke(); ctx.setLineDash([]);
+                }
+
+                if (phase === 'CONFIGURE' || phase === 'SIMULATION' || phase === 'DEBRIEF') {
+                    const y = mapY(capacity); ctx.beginPath(); ctx.strokeStyle = phase === 'SIMULATION' ? '#fff' : '#4ade80'; ctx.lineWidth = 3; ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+                }
+
+                if (phase === 'SIMULATION' || phase === 'DEBRIEF') {
+                    ctx.beginPath(); ctx.strokeStyle = 'white'; ctx.lineWidth = 1; ctx.globalAlpha = 0.8;
+                    const dataToDraw = phase === 'DEBRIEF' ? futureData : futureData.slice(0, simProgress);
+                    dataToDraw.forEach((pt, i) => { if (i===0) ctx.moveTo(mapX(pt.x), mapY(pt.y)); else ctx.lineTo(mapX(pt.x), mapY(pt.y)); });
+                    ctx.stroke(); ctx.globalAlpha = 1;
+                    dataToDraw.forEach(pt => { if (pt.y > capacity) { ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(mapX(pt.x), mapY(capacity), 5, 0, Math.PI*2); ctx.fill(); } });
+                }
+
+                const divX = mapX(VISIBLE_TICKS);
+                ctx.strokeStyle = '#94a3b8'; ctx.setLineDash([2, 2]); ctx.beginPath(); ctx.moveTo(divX, 0); ctx.lineTo(divX, h); ctx.stroke(); ctx.setLineDash([]);
+                ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif'; ctx.fillText("PAST", 10, h-10); ctx.fillText("FUTURE", divX + 10, h-10);
+            }, [historicalData, modelPrediction, capacity, phase, futureData, simProgress]);
+
+            const IntroScreen = () => (
+                <div className="flex flex-col h-full bg-slate-900 text-white p-6 overflow-y-auto">
+                    <div className="flex-1 flex flex-col justify-center items-center text-center space-y-6">
+                        <div className="bg-blue-600/20 p-6 rounded-full relative">
+                            <Volume2 className="absolute top-0 right-0 text-blue-300 animate-pulse" size={24} />
+                            <Server size={64} className="text-blue-400" />
+                        </div>
+                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">Signal Architect</h1>
+                        <div className="text-left bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4 shadow-xl">
+                            <h3 className="font-bold text-blue-300 flex items-center gap-2"><Info size={18}/> REAL WORLD CONTEXT</h3>
+                            <p className="text-slate-300 text-sm leading-relaxed"><strong>Problem:</strong> Telecom towers crash if they have too many users, but waste money if they have too many servers.</p>
+                            <p className="text-slate-300 text-sm leading-relaxed"><strong>Solution:</strong> Use <span className="text-purple-400 font-bold">Machine Learning</span> to predict the future.</p>
+                            <p className="text-slate-300 text-sm leading-relaxed"><strong>Mission:</strong> Analyze the pattern, choose the model, set the capacity.</p>
+                        </div>
                     </div>
-                    
-                    <div className="relative">
-                        <input 
-                            type="range" min="20" max="180" 
-                            value={capacity} 
-                            onChange={(e) => { setCapacity(parseInt(e.target.value)); setUserTouchedSlider(true); }}
-                            className="w-full h-3 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-green-500 relative z-10"
-                        />
-                        {!userTouchedSlider && (
-                            <div className="absolute top-1/2 left-1/2 -translate-y-1/2 z-20 pointer-events-none">
-                                <style>{`@keyframes slide-hint { 0%, 100% { transform: translateX(-40px); } 50% { transform: translateX(40px); } }`}</style>
-                                <div style={{ animation: 'slide-hint 1.5s ease-in-out infinite' }}>
-                                    <Hand size={32} className="text-white drop-shadow-lg fill-white/20" />
+                    <button onClick={() => { const synth = window.speechSynthesis; speak("Welcome, Architect. I am Aria. I will guide you."); initLevel(1); }} className="w-full py-4 bg-blue-600 active:bg-blue-700 font-bold rounded-xl shadow-lg mt-6 text-lg animate-pulse">INITIALIZE (AUDIO ON)</button>
+                </div>
+            );
+
+            if (phase === 'INTRO') return <IntroScreen />;
+
+            return (
+                <div className="h-screen bg-slate-950 flex flex-col font-sans text-slate-100 overflow-hidden selection:bg-blue-500/30">
+                    <header className="flex-none bg-slate-900 border-b border-slate-800 p-3 flex justify-between items-center shadow-md z-10">
+                        <div className="flex flex-col">
+                            <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">INTEGRITY</span>
+                            <div className="flex items-center gap-2">
+                                <div className="w-24 h-2 bg-slate-800 rounded-full overflow-hidden">
+                                    <div className={`h-full transition-all duration-500 ${integrity > 50 ? 'bg-green-500' : 'bg-red-500'}`} style={{width: `${integrity}%`}} />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex flex-col text-right">
+                            <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">LEVEL {level}</span>
+                            <span className="text-xs font-bold text-blue-400">{LEVELS[level].name}</span>
+                        </div>
+                    </header>
+                    <div className="flex-1 relative bg-slate-900 w-full min-h-[35vh]">
+                        <div className="absolute top-4 left-4 right-4 bg-slate-950/90 backdrop-blur-md border border-slate-700 p-3 rounded-xl shadow-2xl flex gap-3 items-start z-20 pointer-events-none">
+                            <div className={`mt-1 w-2 h-2 rounded-full ${isSpeaking ? 'bg-blue-400 animate-ping' : 'bg-slate-600'}`} />
+                            <p className="text-sm text-slate-200 leading-snug font-medium">{dialogue || "Awaiting input..."}</p>
+                        </div>
+                        <canvas ref={canvasRef} className="w-full h-full block" />
+                    </div>
+                    <div className="flex-none bg-slate-950 border-t border-slate-800 p-4 pb-8 min-h-[40vh] max-h-[50vh] overflow-y-auto relative">
+                        {phase === 'BRIEFING' && (
+                            <div className="h-full flex flex-col justify-center space-y-4">
+                                <LevelVisual lvl={level} />
+                                <div className="p-4 bg-slate-900 rounded-xl border border-slate-800">
+                                    <h3 className="text-blue-400 text-sm font-bold mb-1">OBJECTIVE</h3>
+                                    <p className="text-slate-400 text-sm">{LEVELS[level].context}</p>
+                                </div>
+                                <div className="p-4 bg-slate-900 rounded-xl border border-slate-800">
+                                    <h3 className="text-yellow-400 text-sm font-bold mb-1">HINT</h3>
+                                    <p className="text-slate-400 text-sm">{LEVELS[level].tip}</p>
+                                </div>
+                                <button onClick={() => setPhase('SELECT_MODEL')} className="w-full py-4 bg-blue-600 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform">SELECT MODEL <ChevronRight size={18}/></button>
+                            </div>
+                        )}
+                        {phase === 'SELECT_MODEL' && (
+                            <div className="space-y-3">
+                                <h3 className="text-xs text-slate-500 font-bold uppercase tracking-widest mb-2">CHOOSE ALGORITHM</h3>
+                                {Object.keys(MODELS).map(key => (
+                                    <button key={key} onClick={() => selectModel(key)} className="w-full bg-slate-900 hover:bg-slate-800 border border-slate-800 p-4 rounded-xl text-left transition-all active:border-blue-500 group">
+                                        <div className="flex justify-between items-center mb-1"><span className="font-bold text-slate-200 group-hover:text-blue-400">{MODELS[key].name}</span></div>
+                                        <p className="text-xs text-slate-500 leading-tight">{MODELS[key].desc}</p>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                        {phase === 'CONFIGURE' && (
+                            <div className="h-full flex flex-col">
+                                <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 mb-6 relative">
+                                    <div className="flex justify-between items-center mb-4"><span className="text-sm font-bold text-slate-400">SERVER CAPACITY</span><span className="text-xl font-mono text-green-400">{capacity} TB/s</span></div>
+                                    <div className="relative">
+                                        <input type="range" min="20" max="180" value={capacity} onChange={(e) => { setCapacity(parseInt(e.target.value)); setUserTouchedSlider(true); }} className="w-full h-3 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-green-500 relative z-10" />
+                                        {!userTouchedSlider && (
+                                            <div className="absolute top-1/2 left-1/2 -translate-y-1/2 z-20 pointer-events-none">
+                                                <style>{`@keyframes slide-hint { 0%, 100% { transform: translateX(-40px); } 50% { transform: translateX(40px); } }`}</style>
+                                                <div style={{ animation: 'slide-hint 1.5s ease-in-out infinite' }}><Hand size={32} className="text-white drop-shadow-lg fill-white/20" /></div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-slate-500 mt-3 flex gap-2 items-center"><AlertTriangle size={12} className="text-yellow-500" /> Adjust the Green Line to match the Purple Forecast.</p>
+                                </div>
+                                <div className="mt-auto flex gap-3">
+                                    <button onClick={() => { setPhase('SELECT_MODEL'); setModelPrediction([]); setSelectedModel(null); }} className="px-4 py-4 bg-slate-800 rounded-xl font-bold text-slate-400"><RefreshCw size={20} /></button>
+                                    <button onClick={runSimulation} className="flex-1 py-4 bg-green-600 active:bg-green-700 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-green-900/50"><Play size={20} fill="currentColor"/> DEPLOY TO NETWORK</button>
                                 </div>
                             </div>
                         )}
-                    </div>
-                    <p className="text-xs text-slate-500 mt-3 flex gap-2 items-center">
-                        <AlertTriangle size={12} className="text-yellow-500" />
-                        Adjust the Green Line to match the Purple Forecast.
-                    </p>
-                </div>
-                
-                <div className="mt-auto flex gap-3">
-                    <button 
-                        onClick={() => { setPhase('SELECT_MODEL'); setModelPrediction([]); setSelectedModel(null); }}
-                        className="px-4 py-4 bg-slate-800 rounded-xl font-bold text-slate-400"
-                    >
-                        <RefreshCw size={20} />
-                    </button>
-                    <button 
-                        onClick={runSimulation}
-                        className="flex-1 py-4 bg-green-600 active:bg-green-700 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-green-900/50"
-                    >
-                        <Play size={20} fill="currentColor"/> DEPLOY TO NETWORK
-                    </button>
-                </div>
-            </div>
-        )}
-
-        {phase === 'SIMULATION' && (
-            <div className="h-full flex items-center justify-center">
-                <div className="text-center">
-                    <Activity size={48} className="text-blue-500 mx-auto mb-4 animate-pulse" />
-                    <h3 className="text-xl font-bold">LIVE TRAFFIC ACTIVE</h3>
-                    <p className="text-xs text-slate-400 mt-2">Comparing Forecast vs. Reality...</p>
-                </div>
-            </div>
-        )}
-
-        {(phase === 'DEBRIEF' || phase === 'VICTORY') && (
-            <div className="h-full flex flex-col justify-center items-center text-center space-y-6">
-                {integrity > 0 ? (
-                    <>
-                        <CheckCircle size={56} className="text-green-500" />
-                        <div>
-                            <h3 className="text-xl font-bold text-white">SIMULATION COMPLETE</h3>
-                            <p className="text-slate-400 text-sm mt-2 px-4">{dialogue}</p>
-                        </div>
-                        {level < 3 ? (
-                            <button onClick={() => initLevel(level+1)} className="w-full py-4 bg-blue-600 rounded-xl font-bold shadow-lg">NEXT MISSION</button>
-                        ) : (
-                            <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 w-full max-w-xs">
-                                <h4 className="font-bold text-yellow-400 text-lg mb-2">GAME COMPLETED</h4>
-                                <p className="text-sm text-slate-300 mb-4">You have mastered the basics of Applied Machine Learning.</p>
-                                <div className="flex gap-3 justify-center">
-                                    <button onClick={restartGame} className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors"><RotateCcw size={16}/> RESTART</button>
-                                    <button onClick={shareGame} className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors"><Share2 size={16}/> {shareLabel}</button>
+                        {phase === 'SIMULATION' && (
+                            <div className="h-full flex items-center justify-center">
+                                <div className="text-center">
+                                    <Activity size={48} className="text-blue-500 mx-auto mb-4 animate-pulse" />
+                                    <h3 className="text-xl font-bold">LIVE TRAFFIC ACTIVE</h3>
+                                    <p className="text-xs text-slate-400 mt-2">Comparing Forecast vs. Reality...</p>
                                 </div>
                             </div>
                         )}
-                    </>
-                ) : (
-                    <>
-                         <AlertTriangle size={56} className="text-red-500" />
-                         <div>
-                            <h3 className="text-xl font-bold text-red-500">SYSTEM FAILURE</h3>
-                            <p className="text-slate-400 text-sm mt-2">Integrity Critical. Try a different model or adjust capacity.</p>
-                         </div>
-                         <button onClick={() => initLevel(level)} className="w-full py-4 bg-slate-700 rounded-xl font-bold">RETRY LEVEL</button>
-                    </>
-                )}
-            </div>
-        )}
+                        {(phase === 'DEBRIEF' || phase === 'VICTORY') && (
+                            <div className="h-full flex flex-col justify-center items-center text-center space-y-6">
+                                {integrity > 0 ? (
+                                    <>
+                                        <CheckCircle size={56} className="text-green-500" />
+                                        <div><h3 className="text-xl font-bold text-white">SIMULATION COMPLETE</h3><p className="text-slate-400 text-sm mt-2 px-4">{dialogue}</p></div>
+                                        {level < 3 ? (
+                                            <button onClick={() => initLevel(level+1)} className="w-full py-4 bg-blue-600 rounded-xl font-bold shadow-lg">NEXT MISSION</button>
+                                        ) : (
+                                            <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 w-full max-w-xs">
+                                                <h4 className="font-bold text-yellow-400 text-lg mb-2">GAME COMPLETED</h4>
+                                                <p className="text-sm text-slate-300 mb-4">You have mastered the basics of Applied Machine Learning.</p>
+                                                <div className="flex gap-3 justify-center">
+                                                    <button onClick={restartGame} className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors"><RotateCcw size={16}/> RESTART</button>
+                                                    <button onClick={shareGame} className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors"><Share2 size={16}/> {shareLabel}</button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <>
+                                         <AlertTriangle size={56} className="text-red-500" />
+                                         <div><h3 className="text-xl font-bold text-red-500">SYSTEM FAILURE</h3><p className="text-slate-400 text-sm mt-2">Integrity Critical. Try a different model or adjust capacity.</p></div>
+                                         <button onClick={() => initLevel(level)} className="w-full py-4 bg-slate-700 rounded-xl font-bold">RETRY LEVEL</button>
+                                    </>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
 
-      </div>
-    </div>
-  );
-};
-
-export default SignalArchitect;
-
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<SignalArchitect />);
+    </script>
+</body>
+</html>
